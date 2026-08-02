@@ -1,7 +1,7 @@
 #
 # History
 #
-HISTFILE=~/.zsh_history
+HISTFILE="$HOME/.zsh_history"
 HISTSIZE=500000
 SAVEHIST=500000
 
@@ -12,6 +12,10 @@ setopt EXTENDED_HISTORY
 
 histsearch() { fc -lim "*$@*" 1 }
 hs() { fc -lim "*$@*" 1 }
+
+# Fix auto-complete for 'make' so that it works on Mac
+zstyle ':completion:*:*:make:*' tag-order 'targets'
+autoload -U compinit && compinit
 
 #
 # Aliases
@@ -24,15 +28,30 @@ alias git_files_uncommitted="git diff --name-only"
 #
 # General Functions
 #
+
+# Run ssh-add on the specified file (arg 1) in $HOME/ssh/ otherwise guess at one.
 function ssh_init() {
+  local SSH_DIR="$HOME/.ssh"
+  local MOST_RECENT_W_NO_EXT=$(for f in $SSH_DIR/*(D.om); do grep -q "PRIVATE" "$f" && { print -l "$f"; break }; done)
   if [[ $(ssh-add -L) == *identities* ]]; then
-    ssh-add ~/.ssh/id_rsa
+    if [[ -n "$1" && -f "$SSH_DIR/$1" && -r "$SSH_DIR/$1" ]]; then
+      ssh-add $SSH_DIR/$1
+    elif [[ -s "$SSH_DIR/id_ed25519"]]; then
+      ssh-add $SSH_DIR/id_ed25519
+    elif [[ -s "$SSH_DIR/id_rsa"]]; then
+      ssh-add $SSH_DIR/id_rsa
+    elif [[ -n "$MOST_RECENT_W_NO_EXTSSH_DIR" && -s "$MOST_RECENT_W_NO_EXTSSH_DIR"]]; then
+      ssh-add $MOST_RECENT_W_NO_EXTSSH_DIR
+    else 
+      echo "Specify the file in private key file $SSH_DIR/ that should be used with ssh-add."
+    fi
   else
-    echo "Looks like the ssh-agent already has the key."
+    printf echo "\nLooks like the ssh-agent already has a key.\n$(ssh-add -L)\n"
   fi
 }
 
-# Uses ripgrep (https://github.com/burntsushi/ripgrep)
+# Uses ripgrep (https://github.com/burntsushi/ripgrep) to replace
+# the first arg with the second.
 function smart_replace() {
   # See types with rg --type-list
   # Note that this relies on some types defined in ripgreprc
@@ -62,6 +81,29 @@ function dumb_replace() {
       echo "$file"
       sed -b -i "s/$1/$2/g" "$file"
     done
+}
+
+# Removes the prefix (arg 1) from all files in a directory (arg 2).
+function remove_prefix_from_files() {
+  local prefix="$1"
+  local dir="${2:-.}" # Default to current directory if not provided
+
+  if [[ -z "$prefix" ]]; then
+    echo "Usage: remove_prefix_from_files <prefix> [directory]"
+    return 1
+  fi
+
+  # Loop through files in the specified directory that start with the prefix
+  for file in "$dir/$prefix"*; do
+    # Check if the file actually exists and is a regular file
+    if [[ -f "$file" ]]; then
+      # Extract the new filename by removing the prefix
+      local new_name="${file#"$dir/$prefix"}"
+      # Move (rename) the file
+      mv "$file" "$dir/$new_name"
+      echo "Renamed '$file' to '$dir/$new_name'"
+    fi
+  done
 }
 
 #
