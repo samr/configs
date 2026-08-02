@@ -1,0 +1,167 @@
+#
+# History
+#
+HISTFILE=~/.zsh_history
+HISTSIZE=500000
+SAVEHIST=500000
+
+setopt appendhistory       # Append history to the file (don't overwrite)
+setopt INC_APPEND_HISTORY  # Write history to the file immediately after each command
+setopt SHARE_HISTORY       # Share history among all sessions
+setopt EXTENDED_HISTORY
+
+histsearch() { fc -lim "*$@*" 1 }
+hs() { fc -lim "*$@*" 1 }
+
+#
+# Aliases
+#
+alias git_files_status="git status | grep modified | sed -e 's/.*modified:   //g' | xargs echo"
+alias git_files_origin_diff="git diff --compact-summary origin | awk '{print \$1}' | head -n -1 | xargs echo"
+alias git_files_conflicts="git diff --name-only --diff-filter=U | awk '{print \$1}' | head -n -1 | xargs echo"
+alias git_files_uncommitted="git diff --name-only"
+
+#
+# General Functions
+#
+function ssh_init() {
+  if [[ $(ssh-add -L) == *identities* ]]; then
+    ssh-add ~/.ssh/id_rsa
+  else
+    echo "Looks like the ssh-agent already has the key."
+  fi
+}
+
+# Uses ripgrep (https://github.com/burntsushi/ripgrep)
+function smart_replace() {
+  # See types with rg --type-list
+  rg -t cpp -t rust -t csharp -t py -t zig -t go -t java \
+     -t sh -t sql -t typescript -t web -t sass \
+     -t bazel -t cmake -t tf \
+     -t txt -t readme -t json -t yaml -t toml -t xml -t markdown \
+     --type-add 'jenkins:Jenkinsfile*' -t jenkins \
+     --type-add 'sip:*.sip' -t sip \
+     --type-add 'cuda:*.{cuh,cu,cuinc,curnel}' -t cuda \
+     --type-add 'cppextra:*.{hpp.in,cpp.in}' -t cppextra \
+     --type-add 'bat:*.bat' -t bat \
+     --glob '!third_party*' \
+     --files -0 |
+    while IFS= read -r -d '' file; do
+      echo "$file"
+      sed -b -i -r ":1;/$1/I!b;s//\n&&&\n$2\n/;:2
+          s/\n[[:lower:]](.*\n)(.)(.*\n)/\l\2\n\1\3/
+          s/\n[^[:lower:]](.*\n)(.)(.*\n)/\u\2\n\1\3/;t2
+          s/\n.*\n(.*)\n/\1/g;b1" "$file"
+    done
+}
+
+function dumb_replace() {
+  rg -t cpp -t rust -t csharp -t py -t zig -t go -t java \
+     -t sh -t sql -t typescript -t web -t sass \
+     -t bazel -t cmake -t tf \
+     -t txt -t readme -t json -t yaml -t toml -t xml -t markdown \
+     --type-add 'jenkins:Jenkinsfile*' -t jenkins \
+     --type-add 'sip:*.sip' -t sip \
+     --type-add 'cuda:*.{cuh,cu,cuinc,curnel}' -t cuda \
+     --type-add 'cppextra:*.{hpp.in,cpp.in}' -t cppextra \
+     --type-add 'bat:*.bat' -t bat \
+     --glob '!third_party*' \
+     --files -0 |
+    while IFS= read -r -d '' file; do
+      echo "$file"
+      sed -b -i "s/$1/$2/g" "$file"
+    done
+}
+
+#
+# Neovim Functions
+#
+function nv {
+  # Takes neovim arguments
+  if [[ "$1" == "-h" ]]; then
+    nvim --help
+  elif [[ "$1" == "--help" ]]; then
+    nvim --help
+  else
+    # On mac, using -- to separate neovide and neovim cli flags causes a new buffer to show rather than the first file
+    # passed after.
+    neovide --no-tabs --fork $@
+  fi
+}
+
+function nv_git_conflicts() {
+  nv $(git_files_conflicts)
+}
+
+function nv_git_uncommitted() {
+  #nv $(git status | grep modified | sed -e 's/.*modified:   //g' | xargs echo)
+  nv $(git_files_uncommitted)
+}
+
+function nv_git_origin_diff() {
+  nv $(git_files_origin_diff)
+}
+
+function nv_rg() {
+  # Open all files matching the regex using nv
+  rg --no-ignore-messages -l -0 "$@" | xargs --null bash -i -c 'nv $@'
+}
+
+#
+# Multi-repo Functions
+#
+function mrepo-git-pull {
+  if [[ ! -d "$1" ]]; then
+    echo "Must specify a directory as first arg."
+    return
+  fi
+  # Runs git pull across all repos in passed in directory.
+  # Optionally takes the name of the branch to checkout first as 2nd arg.
+  for d in $1/*/.git; do
+    r=$(dirname "$d")
+    printf '\n=== %s ===\n' "$(basename "$r")"
+    if [[ -n "$2" ]]; then
+      git -C "$r" checkout "$2"
+    fi
+    git -C "$r" pull --ff-only
+  done
+}
+
+function mrepo-git-status {
+  if [[ ! -d "$1" ]]; then
+    echo "Must specify a directory as first arg."
+    return
+  fi
+  for d in $1/*/.git; do
+    r=$(dirname "$d")
+    pushd $r >/dev/null
+    printf '\n=== %s ===\n' "$(basename "$r")"
+    git status
+    popd >/dev/null
+  done
+}
+
+function mrepo-git-diff {
+  if [[ ! -d "$1" ]]; then
+    echo "Must specify a directory as first arg."
+    return
+  fi
+  git_branch() {
+    git symbolic-ref --short -q HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null
+  }
+  for d in $1/*/.git; do
+    r=$(dirname "$d")
+    pushd $r >/dev/null
+    printf '\n=== %s ===\n' "$(basename "$r")"
+    echo "branch: $(git_branch)"
+    git diff --compact-summary origin
+    popd >/dev/null
+  done
+}
+
+#
+# Oh-My-Posh Prompt (https://ohmyposh.dev/)
+#
+OMP_CONFIG=$HOME/.config/omp/default.omp.json
+[ -s "$OMP_CONFIG" ] && eval "$(oh-my-posh init zsh --config $OMP_CONFIG)"
+

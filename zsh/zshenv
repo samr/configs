@@ -1,0 +1,5 @@
+[ -s "$HOME/.cargo/env" ] && \. "$HOME/.cargo/env"
+[ -s "$HOME/.local/bin/env" ] && \. "$HOME/.local/bin/env"
+
+export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.hg/*" --glob "!.git/*" --glob "!*.pyc" --glob "!.DS_Store" --glob "!.ccls-cache/*"'
