@@ -35,15 +35,11 @@ function ssh_init() {
 # Uses ripgrep (https://github.com/burntsushi/ripgrep)
 function smart_replace() {
   # See types with rg --type-list
+  # Note that this relies on some types defined in ripgreprc
   rg -t cpp -t rust -t csharp -t py -t zig -t go -t java \
-     -t sh -t sql -t typescript -t web -t sass \
-     -t bazel -t cmake -t tf \
+     -t sh -t cmd -t sql -t typescript -t web -t sass \
+     -t bazel -t cmake -t tf -t jenkins -t cuda -t sip -t cppextra \
      -t txt -t readme -t json -t yaml -t toml -t xml -t markdown \
-     --type-add 'jenkins:Jenkinsfile*' -t jenkins \
-     --type-add 'sip:*.sip' -t sip \
-     --type-add 'cuda:*.{cuh,cu,cuinc,curnel}' -t cuda \
-     --type-add 'cppextra:*.{hpp.in,cpp.in}' -t cppextra \
-     --type-add 'bat:*.bat' -t bat \
      --glob '!third_party*' \
      --files -0 |
     while IFS= read -r -d '' file; do
@@ -57,14 +53,9 @@ function smart_replace() {
 
 function dumb_replace() {
   rg -t cpp -t rust -t csharp -t py -t zig -t go -t java \
-     -t sh -t sql -t typescript -t web -t sass \
-     -t bazel -t cmake -t tf \
+     -t sh -t cmd -t sql -t typescript -t web -t sass \
+     -t bazel -t cmake -t tf -t jenkins -t cuda -t sip -t cppextra \
      -t txt -t readme -t json -t yaml -t toml -t xml -t markdown \
-     --type-add 'jenkins:Jenkinsfile*' -t jenkins \
-     --type-add 'sip:*.sip' -t sip \
-     --type-add 'cuda:*.{cuh,cu,cuinc,curnel}' -t cuda \
-     --type-add 'cppextra:*.{hpp.in,cpp.in}' -t cppextra \
-     --type-add 'bat:*.bat' -t bat \
      --glob '!third_party*' \
      --files -0 |
     while IFS= read -r -d '' file; do

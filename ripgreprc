@@ -1,0 +1,28 @@
+# Requires setting RIPGREP_CONFIG_PATH to be the path to this file. Using forward slashes for Windows paths helps it
+# work in both cmd.exe and bash.
+
+# Don't let ripgrep vomit really long lines to my terminal, and show a preview.
+--max-columns=150
+--max-columns-preview
+
+# Add types. (Can view types with 'rg --type-list')
+--type-add
+web:*.{html,css,js}*
+
+--type-add
+jenkins:Jenkinsfile*
+
+--type-add
+sip:*.sip
+
+--type-add
+cuda:*.{cuh,cu,cuinc,curnel}
+
+--type-add
+cppextra:*.{hpp.in,cpp.in}
+
+# Search hidden files / directories (e.g. dotfiles) by default
+--hidden
+
+# Using glob patterns to include/exclude files or folders
+--glob=!.git/*
