@@ -36,11 +36,11 @@ function ssh_init() {
   if [[ $(ssh-add -L) == *identities* ]]; then
     if [[ -n "$1" && -f "$SSH_DIR/$1" && -r "$SSH_DIR/$1" ]]; then
       ssh-add $SSH_DIR/$1
-    elif [[ -s "$SSH_DIR/id_ed25519"]]; then
+    elif [[ -s "$SSH_DIR/id_ed25519" ]]; then
       ssh-add $SSH_DIR/id_ed25519
-    elif [[ -s "$SSH_DIR/id_rsa"]]; then
+    elif [[ -s "$SSH_DIR/id_rsa" ]]; then
       ssh-add $SSH_DIR/id_rsa
-    elif [[ -n "$MOST_RECENT_W_NO_EXTSSH_DIR" && -s "$MOST_RECENT_W_NO_EXTSSH_DIR"]]; then
+    elif [[ -n "$MOST_RECENT_W_NO_EXTSSH_DIR" && -s "$MOST_RECENT_W_NO_EXTSSH_DIR" ]]; then
       ssh-add $MOST_RECENT_W_NO_EXTSSH_DIR
     else 
       echo "Specify the file in private key file $SSH_DIR/ that should be used with ssh-add."
