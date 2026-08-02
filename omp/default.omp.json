@@ -3,6 +3,7 @@
   "palette": {
     "black": "#262B44",
     "blue": "#4B95E9",
+    "blue-dark": "#205E9E",
     "green": "#59C9A5",
     "orange": "#F07623",
     "red": "#D81E5B",
@@ -15,8 +16,8 @@
     "background": "transparent"
   },
   "transient_prompt": {
-    "template": "<p:yellow,transparent>\ue0b6</><,p:yellow> {{ .Folder }} </><p:yellow,transparent>\ue0b0</> ",
-    "foreground": "p:black",
+    "template": "<p:blue-dark,transparent>\ue0b6</><,p:blue-dark> {{ .Folder }} {{ if .Env.VIRTUAL_ENV }}\ue235 {{ base .Env.VIRTUAL_ENV }} {{ end }}\uf017 {{ now | date \"15:04:05\" }} {{ if gt .Code 0 }}<,p:red>  {{ .Code }} </>{{ else }}{{ end }} </><p:blue-dark,transparent>\ue0b0</> ",
+    "foreground": "p:white",
     "background": "transparent"
   },
   "upgrade": {
@@ -106,7 +107,7 @@
           "trailing_diamond": "\ue0b4",
           "template": " {{ if gt .Code 0 }}\uf00d{{ else }}\uf00c{{ end }} ",
           "foreground": "p:white",
-          "background": "p:blue",
+          "background": "p:blue-dark",
           "type": "status",
           "style": "diamond",
           "background_templates": [
@@ -142,11 +143,11 @@
         },
         {
           "options": {
-            "display_mode": "files",
+            "display_mode": "context",
             "fetch_version": false,
-            "fetch_virtual_env": false
+            "fetch_virtual_env": true
           },
-          "template": "\ue235 ",
+          "template": "\ue235 {{ if .Venv }}{{ .Venv }} {{ end }}",
           "foreground": "p:yellow",
           "background": "transparent",
           "type": "python",
