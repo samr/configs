@@ -1,0 +1,13 @@
+[user]
+  email = 432659+samr@users.noreply.github.com
+  name = samr
+
+[alias]
+  s = "status"
+  b = "branch"
+  c = "commit"
+  co = "checkout"
+  d = "diff"
+  dc = "diff --compact-summary origin"
+  dt = "difftool --dir-diff"
+

@@ -28,6 +28,13 @@ alias git_files_uncommitted="git diff --name-only"
 #
 # General Functions
 #
+function enc_file() {
+  gpg --output "$1.enc" --symmetric --cipher-algo AES256 "$1"
+}
+
+function dec_file() {
+  gpg --output "$1" --decrypt "$1.enc"
+}
 
 # Run ssh-add on the specified file (arg 1) in $HOME/ssh/ otherwise guess at one.
 function ssh_init() {
@@ -116,9 +123,15 @@ function nv {
   elif [[ "$1" == "--help" ]]; then
     nvim --help
   else
-    # On mac, using -- to separate neovide and neovim cli flags causes a new buffer to show rather than the first file
-    # passed after.
-    neovide --no-tabs --fork $@
+    # TERM_OLD=$TERM
+    #export TERM=
+
+    # The "$@" will quote each individual file before passing it, to better deal with spaces in Windows.
+    # The --cmd "bnext" exists to get around th empty buffer that is presented otherwise, despite
+    # having loaded the file.
+    neovide --no-tabs --fork -- --cmd "bnext" "$@" &
+
+    #export TERM=$TERM_OLD
   fi
 }
 
