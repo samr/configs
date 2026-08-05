@@ -50,7 +50,7 @@ function ssh_init() {
       ssh-add $SSH_DIR/id_rsa
     elif [[ -n "$MOST_RECENT_W_NO_EXTSSH_DIR" && -s "$MOST_RECENT_W_NO_EXTSSH_DIR" ]]; then
       ssh-add $MOST_RECENT_W_NO_EXTSSH_DIR
-    else 
+    else
       echo "Specify the file in private key file $SSH_DIR/ that should be used with ssh-add."
     fi
   else
@@ -128,8 +128,9 @@ function nv {
     #export TERM=
 
     # The "$@" will quote each individual file before passing it, to better deal with spaces in Windows.
-    # The --cmd "bnext" exists to get around th empty buffer that is presented otherwise, despite
-    # having loaded the file.
+    # The -c "bnext" exists to get around th empty buffer that is presented otherwise, despite
+    # having loaded the file (note it is -c rather than --cmd so the bnext command is evaluated after
+    # sourcing the neovim config, which fixes filetype detection).
     neovide --no-tabs --fork -- -c "bnext" "$@" &
 
     #export TERM=$TERM_OLD
