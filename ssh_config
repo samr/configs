@@ -1,0 +1,12 @@
+# ~/.ssh/config
+
+# ssh-keygen -t ed25519 -C "432659+samr@users.noreply.github.com"
+# ssh-add ~/.ssh/foo.pub
+# git remote set-url origin git@github-samr:samr/<repo>.git
+# git config user.name Sam
+# git config user.email 432659+samr@users.noreply.github.com
+Host github-samr
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/foo.pub
+  IdentitiesOnly yes

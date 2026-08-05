@@ -21,8 +21,9 @@ autoload -U compinit && compinit
 # Aliases
 #
 alias git_files_status="git status | grep modified | sed -e 's/.*modified:   //g' | xargs echo"
-alias git_files_origin_diff="git diff --compact-summary origin | awk '{print \$1}' | head -n -1 | xargs echo"
-alias git_files_conflicts="git diff --name-only --diff-filter=U | awk '{print \$1}' | head -n -1 | xargs echo"
+alias git_files_origin_diff="git diff --name-only origin | xargs echo"
+alias git_files_staged="git diff --name-only --staged | xargs echo"
+alias git_files_conflicts="git diff --name-only --diff-filter=U | awk '{print \$1}' | sed '$d' | xargs echo"
 alias git_files_uncommitted="git diff --name-only"
 
 #
@@ -129,7 +130,7 @@ function nv {
     # The "$@" will quote each individual file before passing it, to better deal with spaces in Windows.
     # The --cmd "bnext" exists to get around th empty buffer that is presented otherwise, despite
     # having loaded the file.
-    neovide --no-tabs --fork -- --cmd "bnext" "$@" &
+    neovide --no-tabs --fork -- -c "bnext" "$@" &
 
     #export TERM=$TERM_OLD
   fi
@@ -148,6 +149,10 @@ function nv_git_origin_diff() {
   nv $(git_files_origin_diff)
 }
 
+function nv_git_staged() {
+  nv $(git_files_staged)
+}
+
 function nv_rg() {
   # Open all files matching the regex using nv
   rg --no-ignore-messages -l -0 "$@" | xargs --null bash -i -c 'nv $@'
@@ -156,20 +161,26 @@ function nv_rg() {
 #
 # Multi-repo Functions
 #
-function mrepo-git-pull {
+function mrepo-git-checkout {
   if [[ ! -d "$1" ]]; then
-    echo "Must specify a directory as first arg."
+    echo "Must specify a root directory as first arg. That root should have sub-dirs that are git repos."
     return
   fi
-  # Runs git pull across all repos in passed in directory.
-  # Optionally takes the name of the branch to checkout first as 2nd arg.
+  # Runs git checkout across all repos in passed in directory.
   for d in $1/*/.git; do
     r=$(dirname "$d")
-    printf '\n=== %s ===\n' "$(basename "$r")"
-    if [[ -n "$2" ]]; then
-      git -C "$r" checkout "$2"
-    fi
-    git -C "$r" pull --ff-only
+    git -C "$r" checkout ${@:2}
+  done
+}
+
+function mrepo-git-pull {
+  if [[ ! -d "$1" ]]; then
+    echo "Must specify a root directory as first arg. That root should have sub-dirs that are git repos."
+    return
+  fi
+  for d in $1/*/.git; do
+    r=$(dirname "$d")
+    git -C "$r" pull --no-rebase ${@:2}
   done
 }
 

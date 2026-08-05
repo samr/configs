@@ -1,13 +1,30 @@
 [user]
-  email = 432659+samr@users.noreply.github.com
   name = samr
+  email = 432659+samr@users.noreply.github.com
 
 [alias]
-  s = "status"
-  b = "branch"
-  c = "commit"
-  co = "checkout"
-  d = "diff"
-  dc = "diff --compact-summary origin"
-  dt = "difftool --dir-diff"
+    b = branch
+    c = commit
+    s = status
+    co = checkout
+    d = diff --compact-summary
+    dt = difftool --dir-diff --no-symlinks
+    lgb = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(cyan)<%an>%Creset%n' --abbrev-commit --date=relative --branches
 
+### MacOS diff
+# [difftool]
+#     prompt = false
+# 
+# [difftool "opendiff"]
+#     cmd = /usr/bin/opendiff \"$LOCAL\" \"$REMOTE\"
+# 
+# [difftool "bc"]
+#     path = /Applications/Beyond Compare.app/Contents/MacOS/bcomp
+#     trustExitCode = true
+# 
+# [merge]
+#     tool = bc
+# 
+# [mergetool "bc"]
+#     path = /Applications/Beyond Compare.app/Contents/MacOS/bcomp
+#     trustExitCode = true
